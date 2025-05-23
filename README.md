@@ -1,2 +1,2 @@
-# doomport
-doomgeneric (plus plus)
+# rush
+POSIX-compliant rust shell
