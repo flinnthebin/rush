@@ -111,6 +111,13 @@ fn main() -> io::Result<()> {
             Ok(())
         }),
     );
+    builtins.insert(
+        "type",
+        Box::new(|args| {
+            r#type(args);
+            Ok(())
+        }),
+    );
 
     loop {
         // prompt
