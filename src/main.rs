@@ -1,12 +1,11 @@
 use std::env;
 use std::fs;
-#[allow(unused_imports)]
 use std::io::{self, Write};
-use std::path::PathBuf;
-use std::process;
+use std::path::{Path, PathBuf};
+use std::process::{self, Command};
 
 fn exit(code: &str) {
-    let exit_status = code.parse().expect("exit status is not a number");
+    let exit_status = code.parse().expect("failed on exit status");
     process::exit(exit_status)
 }
 
@@ -46,6 +45,18 @@ fn r#type(command: &str) {
     }
 }
 
+fn runprogram(path: &Path, args: &[&str]) {
+    let mut program = Command::new(path.file_name().expect("failed on filename"));
+    if !args.is_empty() {
+        program.args(args);
+    }
+    program
+        .spawn()
+        .expect("failed to spawn")
+        .wait()
+        .expect("failed on wait");
+}
+
 fn main() {
     loop {
         // prompt
@@ -65,7 +76,10 @@ fn main() {
             "exit" => exit(args[0]),
             "echo" => echo(args),
             "type" => r#type(args[0]),
-            _ => println!("{cmd}: command not found"),
+            _ => match pathfind(command) {
+                Some(path) => runprogram(&path, args),
+                None => println!("{cmd}: command not found"),
+            },
         }
     }
 }
