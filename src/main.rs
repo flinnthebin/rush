@@ -1,9 +1,52 @@
+use std::env;
+use std::fs;
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::path::PathBuf;
 use std::process;
 
+fn exit(code: &str) {
+    let exit_status = code.parse().expect("exit status is not a number");
+    process::exit(exit_status)
+}
+
+fn echo(args: &[&str]) {
+    for arg in args {
+        print!("{arg} ");
+    }
+    println!();
+}
+
+fn pathfind(command: &str) -> Option<PathBuf> {
+    let path = env::var_os("PATH")?;
+    for dir in env::split_paths(&path) {
+        let target = dir.join(command);
+        if let Ok(metadata) = fs::metadata(&target) {
+            if metadata.is_file() {
+                return Some(target);
+            }
+        }
+    }
+    None
+}
+
+fn r#type(command: &str) {
+    match command {
+        "exit" | "echo" | "type" => {
+            println!("{} is a shell builtin", command);
+            return;
+        }
+        _ => {}
+    }
+
+    if let Some(path) = pathfind(command) {
+        println!("{} is {}", command, path.display());
+    } else {
+        println!("{}: not found", command);
+    }
+}
+
 fn main() {
-    let exit_status: i32;
     loop {
         // prompt
         print!("$ ");
@@ -19,18 +62,10 @@ fn main() {
 
         // command interpretation
         match command {
-            "exit" => {
-                exit_status = v[1].parse().expect("exit status not a number");
-                break;
-            }
-            "echo" => {
-                for arg in args {
-                    print!("{arg} ");
-                }
-                println!();
-            }
+            "exit" => exit(args[0]),
+            "echo" => echo(args),
+            "type" => r#type(args[0]),
             _ => println!("{cmd}: command not found"),
         }
     }
-    process::exit(exit_status)
 }
