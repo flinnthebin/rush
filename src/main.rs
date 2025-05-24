@@ -128,7 +128,7 @@ fn main() -> io::Result<()> {
         let mut input = String::new();
         io::stdin().read_line(&mut input).unwrap();
         let v: Vec<&str> = input.split_whitespace().collect();
-        if !v.is_empty() {
+        if v.is_empty() {
             continue;
         }
         let command = v[0];
